@@ -1,8 +1,13 @@
 import random
 from termcolor import colored
+import time
+import sys
+import copy
 
 MAIZE_SIZE = 20
 BLOCKS = 100
+
+write = sys.stdout.write
 
 class Cell:
     def __init__ (self, x, y, parent):
@@ -43,15 +48,18 @@ for i in range(BLOCKS):
     blocks.append(blockCell)
     maize[blockCell.x][blockCell.y] = colored('X', 'red')
 
-# Print Maize
-def printMaize():
+def printMaize(maize, temp = True):
     for i in maize:
         for j in i:
             print(j, end=" ")
         print ("")
-    print ("_______________________________________________________")
+    if (temp):
+        for i in maize:
+            write ('\b' * len(i))
+            write ('\033[F')
+    time.sleep(.1)
 
-printMaize()
+printMaize(maize)
 
 def heuristic(a, b):
     return (abs(a.x - b.x) + abs(a.y - b.y))
@@ -68,8 +76,6 @@ def popFromOpenSet(openSet):
     del openSet[minVal]
     return cell
 
-lastCheckedNode = start
-
 openSet = []
 closedSet = []
 
@@ -78,14 +84,23 @@ openSet.append(start)
 current = start
 
 while (len(openSet) > 0):
-    # printMaize()
-
     current = popFromOpenSet(openSet)
 
     # print (openSet)
     if(current == goal):
-        print ("Got Solution")
+        # print ("Got Solution")
         break
+
+    # print Map
+    tempMaize = copy.deepcopy(maize)
+    tempMaize[start.x][start.y] = colored('S', 'blue')
+    tempCurrent = current
+    while tempCurrent.parent is not None:
+        tempMaize[tempCurrent.x][tempCurrent.y] = colored('O', 'yellow')
+        tempCurrent = tempCurrent.parent
+    tempMaize[goal.x][goal.y] = colored('G', 'green')
+
+    printMaize(tempMaize)
 
     # Searching
     closedSet.append(current)
@@ -125,4 +140,4 @@ if (current == goal):
 else:
     print ("NO SOLUTION")
 
-printMaize()
+printMaize(maize, False)
